@@ -12,33 +12,25 @@ try {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Blocked Hostnames Check
-  const blockedHostnames = ["gointerstellar.app"];
-
-  if (!blockedHostnames.includes(window.location.hostname)) {
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "//nightsclotheshazardous.com/1c/c3/8a/1cc38a6899fdf8ba4dfe779bcc54627b.js";
-    document.body.appendChild(script);
-  }
+  // Ad-free environment enabled
 
   const nav = document.querySelector(".f-nav");
 
   if (nav) {
     const themeId = localStorage.getItem("theme");
-    let LogoUrl = "/assets/media/favicon/main.png";
-    if (themeId === "Inverted") {
-      LogoUrl = "/assets/media/favicon/main-inverted.png";
-    }
+    let LogoUrl = "/assets/media/favicon/zenith.png";
     const html = `
       <div id="icon-container">
-        <a class="icon" href="/./"><img alt="nav" id="INImg" src="${LogoUrl}"/></a>
+        <a class="icon" href="/./" style="display: flex; align-items: center; gap: 10px;">
+          <img alt="Zenith" id="INImg" src="${LogoUrl}" style="width: 40px; height: 40px;"/>
+          <span style="font-weight: 800; color: var(--accent-primary); letter-spacing: 1px;">ZENITH</span>
+        </a>
       </div>
       <div class="f-nav-right">
-        <a class="navbar-link" href="/./a"><i class="fa-solid fa-gamepad navbar-icon"></i><an>&#71;&#97;</an><an>&#109;&#101;&#115;</an></a>
-        <a class="navbar-link" href="/./b"><i class="fa-solid fa-phone navbar-icon"></i><an>&#65;&#112;</an><an>&#112;&#115;</an></a>
-        ${qp ? "" : '<a class="navbar-link" href="/./d"><i class="fa-solid fa-laptop navbar-icon"></i><an>&#84;&#97;</an><an>&#98;&#115;</an></a>'}
-        <a class="navbar-link" href="/./c"><i class="fa-solid fa-gear navbar-icon settings-icon"></i><an>&#83;&#101;&#116;</an><an>&#116;&#105;&#110;&#103;</an></a>
+        <a class="navbar-link" href="/./a"><i class="fa-solid fa-gamepad navbar-icon"></i><an>Games</an></a>
+        <a class="navbar-link" href="/./b"><i class="fa-solid fa-phone navbar-icon"></i><an>Apps</an></a>
+        ${qp ? "" : '<a class="navbar-link" href="/./d"><i class="fa-solid fa-laptop navbar-icon"></i><an>Tabs</an></a>'}
+        <a class="navbar-link" href="/./c"><i class="fa-solid fa-gear navbar-icon settings-icon"></i><an>Settings</an></a>
       </div>`;
     nav.innerHTML = html;
   }
