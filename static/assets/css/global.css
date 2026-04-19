@@ -11,7 +11,7 @@
    --text-secondary: #a0a0a0;
    --glass-border: rgba(255, 255, 255, 0.1);
    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-   
+
    /* Mappings to existing variables for compatibility */
    --background-image: linear-gradient(135deg, #050505 0%, #1a1a1a 100%);
    --backdrop-filter: blur(12px) saturate(180%);
@@ -26,11 +26,11 @@
    --slider-active-background: var(--accent-primary);
    --slider-inactive-background: #333;
    --nav-image: url("/assets/media/favicon/main.png");
-   
+
    /* Text Variables */
    --text-dark: var(--text-secondary);
    --text-placeholder: #666;
-   
+
    /* Other Variables */
    --save-button: var(--accent-primary);
    --reset-button: #ff3e3e;

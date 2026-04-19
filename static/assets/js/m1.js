@@ -19,12 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (nav) {
     const LogoUrl = "https://cdn.glitch.global/0f91a92e-333e-436b-80a5-f4857b28f321/Zenith%20Logo.png?v=1713045612347";
 
-// Search Engine Migration: Switch from blocked search engines to Brave Search
-const currentEngine = localStorage.getItem("engine");
-if (!currentEngine || currentEngine.includes("google.com/search") || currentEngine.includes("duckduckgo.com")) {
-    localStorage.setItem("engine", "https://search.brave.com/search?q=");
-    localStorage.setItem("enginename", "Brave");
-}
+    // Search Engine Migration: Switch from blocked search engines to Brave Search
+    const currentEngine = localStorage.getItem("engine");
+    if (!currentEngine || currentEngine.includes("google.com/search") || currentEngine.includes("duckduckgo.com")) {
+      localStorage.setItem("engine", "https://search.brave.com/search?q=");
+      localStorage.setItem("enginename", "Brave");
+    }
     const html = `
       <div id="icon-container">
         <a class="icon" href="/./" style="display: flex; align-items: center; gap: 10px;">

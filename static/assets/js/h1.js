@@ -3,7 +3,7 @@ let inFrame;
 
 try {
   inFrame = window !== top;
-} catch (e) {
+} catch (_e) {
   inFrame = true;
 }
 if (!localStorage.getItem("ab")) localStorage.setItem("ab", true);
@@ -50,7 +50,7 @@ if (!inFrame && !navigator.userAgent.includes("Firefox") && localStorage.getItem
   }, 2000);
 }
 // Particles
-document.addEventListener("DOMContentLoaded", event => {
+document.addEventListener("DOMContentLoaded", _event => {
   if (window.localStorage.getItem("Particles") === "true") {
     const particlesConfig = {
       particles: {
@@ -166,18 +166,7 @@ document.addEventListener("DOMContentLoaded", event => {
   }
 });
 // Splash texts
-const SplashT = [
-  "Welcome to Zenith",
-  "The peak of unblocking",
-  "Elevate your experience",
-  "Fast, secure, and limitless",
-  "Join the Zenith community",
-  "Beyond the horizon",
-  "Unblock everything with Zenith",
-  "Premium performance, zero cost",
-  "Check out the settings page",
-  "Made for the modern web",
-];
+const SplashT = ["Welcome to Zenith", "The peak of unblocking", "Elevate your experience", "Fast, secure, and limitless", "Join the Zenith community", "Beyond the horizon", "Unblock everything with Zenith", "Premium performance, zero cost", "Check out the settings page", "Made for the modern web"];
 
 let SplashI = Math.floor(Math.random() * SplashT.length);
 const SplashE = document.getElementById("splash");

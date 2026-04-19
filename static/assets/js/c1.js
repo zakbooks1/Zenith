@@ -155,7 +155,7 @@ function pinContains(i, p) {
   return false;
 }
 
-function Custom(app) {
+function Custom(_app) {
   const title = prompt("Enter title for the app:");
   const link = prompt("Enter link for the app:");
   if (title && link) {
@@ -379,7 +379,7 @@ fetch(path)
     console.error("Error fetching JSON data:", error);
   });
 
-function category() {
+function _category() {
   const selectedCategories = Array.from(document.querySelectorAll("#category option:checked")).map(option => option.value);
   const g = document.getElementsByClassName("column");
 
@@ -394,7 +394,7 @@ function category() {
   }
 }
 
-function bar() {
+function _bar() {
   const input = document.getElementById("search");
   const filter = input.value.toLowerCase();
   const g = document.getElementsByClassName("column");
