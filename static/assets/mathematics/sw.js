@@ -1,4 +1,4 @@
-/* Zenith Core Service Worker - Final Polish Edition (ES6+) */
+/* Zenith Core Service Worker - Global Safety Edition (ES6+) */
 importScripts("/assets/mathematics/bundle.js?v=9-30-2024");
 importScripts("/assets/mathematics/config.js?v=9-30-2024");
 
@@ -169,10 +169,13 @@ class UVServiceWorker extends EventEmitter {
         return u.returnValue;
       }
       
+      // CRITICAL SAFETY LOCK: Never allow status 0 to reach the browser
+      const finalStatus = (c.status < 200 || c.status > 599) ? 200 : c.status;
+      
       return new Response(c.body, {
         headers: c.headers,
-        status: c.status,
-        statusText: c.statusText,
+        status: finalStatus,
+        statusText: c.statusText || "OK",
       });
     } catch (err) {
       return new Response(err.toString(), { status: 500 });
