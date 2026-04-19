@@ -1,4 +1,4 @@
-/* Zenith Core Service Worker - Ultra-Clean Edition (ES6+) */
+/* Zenith Core Service Worker - Google Optimizer Edition (ES6+) */
 importScripts("/assets/mathematics/bundle.js?v=9-30-2024");
 importScripts("/assets/mathematics/config.js?v=9-30-2024");
 
@@ -30,6 +30,8 @@ class UVServiceWorker extends EventEmitter {
         "x-permitted-cross-domain-policies",
         "x-powered-by",
         "x-xss-protection",
+        "report-to",
+        "nel"
       ],
       forward: ["accept-encoding", "connection", "content-length"],
     };
@@ -108,6 +110,7 @@ class UVServiceWorker extends EventEmitter {
         return u.returnValue;
       }
       
+      // DEEP STRIP: Remove all security headers that break Google
       for (const header of this.headers.csp) {
         if (c.headers[header]) {
           delete c.headers[header];
@@ -143,6 +146,7 @@ class UVServiceWorker extends EventEmitter {
           switch (e.destination) {
             case "script":
             case "worker":
+              // Force trust for Google scripts
               finalBody = `if (!self.__uv && self.importScripts) importScripts('${__uv$config.bundle}', '${__uv$config.config}', '${__uv$config.handler}');\n${t.js.rewrite(text)}`;
               break;
             case "style":
@@ -161,6 +165,8 @@ class UVServiceWorker extends EventEmitter {
                     e.referrer,
                   ),
                 });
+                // Strip meta CSP tags from HTML
+                finalBody = finalBody.replace(/<meta[^>]*content-security-policy[^>]*>/gi, "");
               } else {
                 finalBody = text;
               }
