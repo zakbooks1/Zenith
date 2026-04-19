@@ -1,6 +1,6 @@
 self.__uv$config = {
   prefix: "/a/",
-  bare: "https://bare.tomp.app/",
+  bare: "https://bare.toadsworld.org/",
   encodeUrl: Ultraviolet.codec.xor.encode,
   decodeUrl: Ultraviolet.codec.xor.decode,
   handler: "/assets/mathematics/handler.js?v=9-30-2024",
