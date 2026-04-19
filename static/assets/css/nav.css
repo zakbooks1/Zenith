@@ -77,6 +77,20 @@ img {
    right: 2%;
 }
 
+.navbar-icon {
+   margin-right: 5px;
+   transition: all 0.2s ease;
+}
+
+.navbar-link {
+   margin-right: 5px;
+}
+
+.navbar-link:hover > .settings-icon {
+   animation: spin 0.5s;
+   animation-timing-function: cubic-bezier(0, 1.04, 0.91, 0.99);
+}
+
 .f-nav-right .navbar-link {
    margin-left: 10px;
    text-transform: uppercase;
@@ -127,22 +141,8 @@ img {
    transform: translateX(-20%);
 }
 
-.navbar-icon {
-   margin-right: 5px;
-   transition: all 0.2s ease;
-}
-
-.navbar-link {
-   margin-right: 5px;
-}
-
-.navbar-link:hover > .settings-icon {
-   animation: spin 0.5s;
-   animation-timing-function: cubic-bezier(0, 1.04, 0.91, 0.99);
-}
-
 @media (max-width: 768px) {
-   .f-nav-right .navbar-link an {
+   .f-nav-right .navbar-link a {
       display: none;
    }
    .f-nav-right .fa-solid {

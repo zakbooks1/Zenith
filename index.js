@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { createBareServer } from "@nebula-services/bare-server-node";
@@ -24,7 +23,6 @@ const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // Cache for 30 Days
 
 if (config.challenge !== false) {
   console.log(chalk.green("🔒 Password protection is enabled! Listing logins below"));
-  // biome-ignore lint: idk
   Object.entries(config.users).forEach(([username, password]) => {
     console.log(chalk.blue(`Username: ${username}, Password: ${password}`));
   });
@@ -102,18 +100,17 @@ const routes = [
   { path: "/", file: "index.html" },
 ];
 
-// biome-ignore lint: idk
 routes.forEach(route => {
   app.get(route.path, (_req, res) => {
     res.sendFile(path.join(__dirname, "static", route.file));
   });
 });
 
-app.use((req, res, next) => {
+app.use((_req, res, _next) => {
   res.status(404).sendFile(path.join(__dirname, "static", "404.html"));
 });
 
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   console.error(err.stack);
   res.status(500).sendFile(path.join(__dirname, "static", "404.html"));
 });

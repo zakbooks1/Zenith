@@ -179,6 +179,15 @@ p {
    font-size: 25px;
 }
 
+iframe {
+   position: absolute;
+   width: 100%;
+   height: 90%;
+   border: none;
+   left: 0;
+   top: 10%;
+}
+
 .frame-container iframe {
    display: none;
 }
@@ -226,13 +235,4 @@ li.active {
 
 li:hover {
    background-color: var(--tab-active-background);
-}
-
-iframe {
-   position: absolute;
-   width: 100%;
-   height: 90%;
-   border: none;
-   left: 0;
-   top: 10%;
 }

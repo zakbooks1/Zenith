@@ -53,6 +53,17 @@ a {
    color: var(--text-primary);
 }
 
+input {
+   padding: 15px;
+   border-radius: 10px;
+   background: var(--background-input);
+   text-align: center;
+   font-size: 20px;
+   border: none;
+   outline: none;
+   color: var(--text-primary);
+}
+
 .switch {
    position: relative;
    display: inline-block;
@@ -96,17 +107,6 @@ input:checked + .slider-round {
 
 input:checked + .slider-round:before {
    transform: translateX(26px);
-}
-
-input {
-   padding: 15px;
-   border-radius: 10px;
-   background: var(--background-input);
-   text-align: center;
-   font-size: 20px;
-   border: none;
-   outline: none;
-   color: var(--text-primary);
 }
 
 .key-form {
