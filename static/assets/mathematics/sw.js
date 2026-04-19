@@ -1,4 +1,4 @@
-/* Zenith Core Service Worker - Body-Lock Shield Edition (ES6+) */
+/* Zenith Core Service Worker - Immutable Stream Edition (ES6+) */
 importScripts("/assets/mathematics/bundle.js?v=9-30-2024");
 importScripts("/assets/mathematics/config.js?v=9-30-2024");
 
@@ -131,7 +131,7 @@ class UVServiceWorker extends EventEmitter {
         delete c.headers["set-cookie"];
       }
       
-      let finalBody = c.body;
+      let finalBody;
 
       if (c.body) {
         const contentType = c.headers["content-type"] || "";
@@ -139,7 +139,7 @@ class UVServiceWorker extends EventEmitter {
         const needsRewrite = ["script", "worker", "style", "iframe", "document"].includes(e.destination) || isHtmlContent;
         
         if (needsRewrite) {
-          // If we need to rewrite, we consume the original body and replace finalBody with a string
+          // CASE 1: Rewrite needed - Consume the text and discard the stream
           const text = await a.text();
           switch (e.destination) {
             case "script":
@@ -173,7 +173,12 @@ class UVServiceWorker extends EventEmitter {
                  finalBody = text;
               }
           }
+        } else {
+          // CASE 2: No rewrite needed - Use the untouched stream
+          finalBody = c.body;
         }
+      } else {
+        finalBody = null;
       }
       
       if (n.headers.accept === "text/event-stream") {
