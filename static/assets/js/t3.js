@@ -7,7 +7,8 @@ window.addEventListener("load", () => {
     form.addEventListener("submit", async event => {
       event.preventDefault();
       const formValue = input.value.trim();
-      const url = isUrl(formValue) ? prependHttps(formValue) : `https://www.google.com/search?q=${formValue}`;
+      const engine = localStorage.getItem("engine") || "https://duckduckgo.com/?q=";
+      const url = isUrl(formValue) ? prependHttps(formValue) : engine + formValue;
       processUrl(url);
     });
   }
