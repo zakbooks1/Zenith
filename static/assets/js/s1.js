@@ -310,8 +310,8 @@ function EngineChange(dropdown) {
   const selectedEngine = dropdown.value;
 
   const engineUrls = {
-    Brave: "https://search.brave.com/search?q=",
     Google: "https://www.google.com/search?q=",
+    Brave: "https://search.brave.com/search?q=",
     Bing: "https://www.bing.com/search?q=",
     Qwant: "https://www.qwant.com/?q=",
     Startpage: "https://www.startpage.com/search?q=",
@@ -423,7 +423,7 @@ function importSaveData() {
           });
         }
         alert("Your save data has been imported. Please test it out.");
-        alert("If you find any issues then report it in GitHub or the Interstellar Discord.");
+        alert("If you find any issues then report it in GitHub or the Zenith Discord.");
       } catch (error) {
         console.error("Error parsing JSON file:", error);
       }

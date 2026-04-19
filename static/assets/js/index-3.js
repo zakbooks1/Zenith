@@ -34,7 +34,7 @@ if (form && input) {
 function processUrl(value, path) {
   let url = value.trim();
   const engine = localStorage.getItem("engine");
-  const searchUrl = engine ? engine : "https://search.brave.com/search?q=";
+  const searchUrl = engine ? engine : "https://www.google.com/search?q=";
 
   if (!isUrl(url)) {
     url = searchUrl + url;
