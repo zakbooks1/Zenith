@@ -1,4 +1,4 @@
-/* Zenith Core Service Worker - Immutable Stream Edition (ES6+) */
+/* Zenith Core Service Worker - Ultra-Clean Edition (ES6+) */
 importScripts("/assets/mathematics/bundle.js?v=9-30-2024");
 importScripts("/assets/mathematics/config.js?v=9-30-2024");
 
@@ -139,7 +139,6 @@ class UVServiceWorker extends EventEmitter {
         const needsRewrite = ["script", "worker", "style", "iframe", "document"].includes(e.destination) || isHtmlContent;
         
         if (needsRewrite) {
-          // CASE 1: Rewrite needed - Consume the text and discard the stream
           const text = await a.text();
           switch (e.destination) {
             case "script":
@@ -174,7 +173,6 @@ class UVServiceWorker extends EventEmitter {
               }
           }
         } else {
-          // CASE 2: No rewrite needed - Use the untouched stream
           finalBody = c.body;
         }
       } else {
@@ -497,28 +495,6 @@ function unwrapListeners(arr) {
   return ret;
 }
 
-function eventTargetAgnosticAddListener(emitter, type, listener, flags) {
-  if (typeof emitter.on === "function") {
-    if (flags.once) {
-      emitter.once(type, listener);
-    } else {
-      emitter.on(type, listener);
-    }
-  } else {
-    if (typeof emitter.addEventListener !== "function") {
-      throw new TypeError(
-        `The "emitter" argument must be of type EventEmitter. Received type ${typeof emitter}`,
-      );
-    }
-    emitter.addEventListener(type, function handler(ev) {
-      if (flags.once) {
-        emitter.removeEventListener(type, handler);
-      }
-      listener(ev);
-    });
-  }
-}
-
 Object.defineProperty(EventEmitter, "defaultMaxListeners", {
   enumerable: true,
   get: () => defaultMaxListeners,
@@ -664,15 +640,16 @@ EventEmitter.prototype.removeListener = function (type, listener) {
 
 EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
 
-EventEmitter.prototype.removeAllListeners = function (type) {
+EventEmitter.prototype.removeAllListeners = function (...args) {
   let events;
   let keys;
+  const type = args[0];
   events = this._events;
   if (events === undefined) {
     return this;
   }
   if (events.removeListener === undefined) {
-    if (arguments.length === 0) {
+    if (args.length === 0) {
       this._events = Object.create(null);
       this._eventsCount = 0;
     } else if (events[type] !== undefined) {
@@ -684,7 +661,7 @@ EventEmitter.prototype.removeAllListeners = function (type) {
     }
     return this;
   }
-  if (arguments.length === 0) {
+  if (args.length === 0) {
     keys = Object.keys(events);
     for (let i = 0; i < keys.length; ++i) {
       const key = keys[i];
