@@ -168,7 +168,7 @@ class UVServiceWorker extends EventEmitter {
               #end-spacer{height:40px}
               p.extra{margin:4px 0}
             </style>`;
-            finalBody = finalBody.replace("</head>", ddgLiteStyle + "</head>");
+            finalBody = finalBody.replace("</head>", `${ddgLiteStyle}</head>`);
           }
         } else {
           finalBody = c.body;
