@@ -17,8 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const nav = document.querySelector(".f-nav");
 
   if (nav) {
-    const themeId = localStorage.getItem("theme");
-    let LogoUrl = "/assets/media/favicon/zenith.png";
+    const LogoUrl = "/assets/media/favicon/zenith.png";
     const html = `
       <div id="icon-container">
         <a class="icon" href="/./" style="display: flex; align-items: center; gap: 10px;">

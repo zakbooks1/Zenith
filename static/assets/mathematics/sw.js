@@ -1,4 +1,4 @@
-/* Zenith Core Service Worker - Nuclear Clean Edition (ES6+) */
+/* Zenith Core Service Worker - Final Polish Edition (ES6+) */
 importScripts("/assets/mathematics/bundle.js?v=9-30-2024");
 importScripts("/assets/mathematics/config.js?v=9-30-2024");
 
@@ -70,7 +70,7 @@ class UVServiceWorker extends EventEmitter {
         n.base = blobUrl;
       }
       
-      if (e.referrer && e.referrer.startsWith(location.origin)) {
+      if (e.referrer?.startsWith(location.origin)) {
         const refUrl = new URL(t.sourceUrl(e.referrer));
         if (n.headers.origin || (t.meta.url.origin !== refUrl.origin && e.mode === "cors")) {
           n.headers.origin = refUrl.origin;
@@ -335,10 +335,6 @@ ReflectOwnKeys =
           )
       : (obj) => Object.getOwnPropertyNames(obj);
 
-const NumberIsNaN =
-  Number.isNaN ||
-  ((val) => val !== val);
-
 function EventEmitter() {
   EventEmitter.init.call(this);
 }
@@ -366,7 +362,6 @@ function _getMaxListeners(emitter) {
 }
 
 function _addListener(emitter, type, listener, prepend) {
-  let m;
   let events;
   let existing;
   checkListener(listener);
@@ -392,7 +387,7 @@ function _addListener(emitter, type, listener, prepend) {
     } else {
       existing.push(listener);
     }
-    m = _getMaxListeners(emitter);
+    const m = _getMaxListeners(emitter);
     if (m > 0 && existing.length > m && !existing.warned) {
       existing.warned = true;
       const err = new Error(
@@ -479,31 +474,6 @@ function unwrapListeners(arr) {
   return ret;
 }
 
-function once(emitter, type) {
-  return new Promise((resolve, reject) => {
-    function errorListener(err) {
-      emitter.removeListener(type, resolver);
-      reject(err);
-    }
-    function resolver(...args) {
-      if (typeof emitter.removeListener === "function") {
-        emitter.removeListener("error", errorListener);
-      }
-      resolve(args);
-    }
-    eventTargetAgnosticAddListener(emitter, type, resolver, { once: true });
-    if (type !== "error") {
-      addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });
-    }
-  });
-}
-
-function addErrorHandlerIfEventEmitter(emitter, handler, flags) {
-  if (typeof emitter.on === "function") {
-    eventTargetAgnosticAddListener(emitter, "error", handler, flags);
-  }
-}
-
 function eventTargetAgnosticAddListener(emitter, type, listener, flags) {
   if (typeof emitter.on === "function") {
     if (flags.once) {
@@ -530,7 +500,7 @@ Object.defineProperty(EventEmitter, "defaultMaxListeners", {
   enumerable: true,
   get: () => defaultMaxListeners,
   set: (arg) => {
-    if (typeof arg !== "number" || arg < 0 || NumberIsNaN(arg)) {
+    if (typeof arg !== "number" || arg < 0 || Number.isNaN(arg)) {
       throw new RangeError(
         `The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ${arg}.`,
       );
@@ -548,7 +518,7 @@ EventEmitter.init = function () {
 };
 
 EventEmitter.prototype.setMaxListeners = function (n) {
-  if (typeof n !== "number" || n < 0 || NumberIsNaN(n)) {
+  if (typeof n !== "number" || n < 0 || Number.isNaN(n)) {
     throw new RangeError(
       `The value of "n" is out of range. It must be a non-negative number. Received ${n}.`,
     );
