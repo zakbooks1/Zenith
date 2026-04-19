@@ -14,9 +14,9 @@ import config from "./config.js";
 console.log(chalk.yellow("🚀 Starting server..."));
 
 const __dirname = process.cwd();
-const server = http.createServer();
+const isVercel = Boolean(process.env.VERCEL);
 const app = express();
-const bareServer = createBareServer("/ca/");
+const bareServer = isVercel ? null : createBareServer("/ca/");
 const PORT = process.env.PORT || 8080;
 const cache = new Map();
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // Cache for 30 Days
@@ -115,24 +115,26 @@ app.use((err, _req, res, _next) => {
   res.status(500).sendFile(path.join(__dirname, "static", "404.html"));
 });
 
-server.on("request", (req, res) => {
-  if (bareServer.shouldRoute(req)) {
-    bareServer.routeRequest(req, res);
-  } else {
-    app(req, res);
-  }
-});
+if (!isVercel) {
+  const server = http.createServer();
+  server.on("request", (req, res) => {
+    if (bareServer?.shouldRoute(req)) {
+      bareServer.routeRequest(req, res);
+    } else {
+      app(req, res);
+    }
+  });
+  server.on("upgrade", (req, socket, head) => {
+    if (bareServer?.shouldRoute(req)) {
+      bareServer.routeUpgrade(req, socket, head);
+    } else {
+      socket.end();
+    }
+  });
+  server.on("listening", () => {
+    console.log(chalk.green(`🌍 Server is running on http://localhost:${PORT}`));
+  });
+  server.listen({ port: PORT });
+}
 
-server.on("upgrade", (req, socket, head) => {
-  if (bareServer.shouldRoute(req)) {
-    bareServer.routeUpgrade(req, socket, head);
-  } else {
-    socket.end();
-  }
-});
-
-server.on("listening", () => {
-  console.log(chalk.green(`🌍 Server is running on http://localhost:${PORT}`));
-});
-
-server.listen({ port: PORT });
+export default app;
