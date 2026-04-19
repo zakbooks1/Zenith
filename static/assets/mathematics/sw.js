@@ -2,115 +2,133 @@ importScripts("/assets/mathematics/bundle.js?v=9-30-2024"),
   importScripts("/assets/mathematics/config.js?v=9-30-2024");
 class UVServiceWorker extends EventEmitter {
   constructor(e = __uv$config) {
-    super(),
-      e.bare || (e.bare = "/ca/"),
-      (this.addresses =
-        "string" == typeof e.bare
-          ? [new URL(e.bare, location)]
-          : e.bare.map(e => new URL(e, location))),
-      (this.headers = {
-        csp: [
-          "cross-origin-embedder-policy",
-          "cross-origin-opener-policy",
-          "cross-origin-resource-policy",
-          "content-security-policy",
-          "content-security-policy-report-only",
-          "expect-ct",
-          "feature-policy",
-          "origin-isolation",
-          "strict-transport-security",
-          "upgrade-insecure-requests",
-          "x-content-type-options",
-          "x-download-options",
-          "x-frame-options",
-          "x-permitted-cross-domain-policies",
-          "x-powered-by",
-          "x-xss-protection",
-        ],
-        forward: ["accept-encoding", "connection", "content-length"],
-      }),
-      (this.method = { empty: ["GET", "HEAD"] }),
-      (this.statusCode = { empty: [204, 304] }),
-      (this.config = e),
-      (this.browser = Ultraviolet.Bowser.getParser(
-        self.navigator.userAgent,
-      ).getBrowserName()),
-      "Firefox" === this.browser &&
-        (this.headers.forward.push("user-agent"),
-        this.headers.forward.push("content-type"));
+    super();
+    if (!e.bare) e.bare = "/ca/";
+    this.addresses =
+      "string" == typeof e.bare
+        ? [new URL(e.bare, location)]
+        : e.bare.map(e => new URL(e, location));
+    this.headers = {
+      csp: [
+        "cross-origin-embedder-policy",
+        "cross-origin-opener-policy",
+        "cross-origin-resource-policy",
+        "content-security-policy",
+        "content-security-policy-report-only",
+        "expect-ct",
+        "feature-policy",
+        "origin-isolation",
+        "strict-transport-security",
+        "upgrade-insecure-requests",
+        "x-content-type-options",
+        "x-download-options",
+        "x-frame-options",
+        "x-permitted-cross-domain-policies",
+        "x-powered-by",
+        "x-xss-protection",
+      ],
+      forward: ["accept-encoding", "connection", "content-length"],
+    };
+    this.method = { empty: ["GET", "HEAD"] };
+    this.statusCode = { empty: [204, 304] };
+    this.config = e;
+    this.browser = Ultraviolet.Bowser.getParser(
+      self.navigator.userAgent,
+    ).getBrowserName();
+    if ("Firefox" === this.browser) {
+      this.headers.forward.push("user-agent");
+      this.headers.forward.push("content-type");
+    }
   }
   async fetch({ request: e }) {
     if (!e.url.startsWith(location.origin + (this.config.prefix || "/service/")))
       return fetch(e);
     try {
       const t = new Ultraviolet(this.config);
-      "function" == typeof this.config.construct &&
+      if ("function" == typeof this.config.construct) {
         this.config.construct(t, "service");
+      }
       const r = await t.cookie.db();
-      (t.meta.origin = location.origin),
-        (t.meta.base = t.meta.url = new URL(t.sourceUrl(e.url)));
+      t.meta.origin = location.origin;
+      t.meta.base = t.meta.url = new URL(t.sourceUrl(e.url));
+      
       const n = new RequestContext(
         e,
         this,
         t,
         this.method.empty.includes(e.method.toUpperCase()) ? null : await e.blob(),
       );
-      if (
-        ("blob:" === t.meta.url.protocol &&
-          ((n.blob = !0), (n.base = n.url = new URL(n.url.pathname))),
-        e.referrer && e.referrer.startsWith(location.origin))
-      ) {
-        const r = new URL(t.sourceUrl(e.referrer));
-        (n.headers.origin ||
-          (t.meta.url.origin !== r.origin && "cors" === e.mode)) &&
-          (n.headers.origin = r.origin),
-          (n.headers.referer = r.href);
+      
+      if ("blob:" === t.meta.url.protocol) {
+        n.blob = true;
+        n.base = n.url = new URL(n.url.pathname);
       }
-      const s = (await t.cookie.getCookies(r)) || [],
-        i = t.cookie.serialize(s, t.meta, !1);
-      "Firefox" === this.browser &&
-        "iframe" !== e.destination &&
-        "document" !== e.destination &&
-        n.forward.shift(),
-        i && (n.headers.cookie = i),
-        (n.headers.Host = n.url.host);
+      
+      if (e.referrer && e.referrer.startsWith(location.origin)) {
+        const r = new URL(t.sourceUrl(e.referrer));
+        if (n.headers.origin || (t.meta.url.origin !== r.origin && "cors" === e.mode)) {
+          n.headers.origin = r.origin;
+        }
+        n.headers.referer = r.href;
+      }
+      
+      const s = (await t.cookie.getCookies(r)) || [];
+      const i = t.cookie.serialize(s, t.meta, !1);
+      
+      if ("Firefox" === this.browser && "iframe" !== e.destination && "document" !== e.destination) {
+        n.forward.shift();
+      }
+      
+      if (i) n.headers.cookie = i;
+      n.headers.Host = n.url.host;
+      
       const o = new HookEvent(n, null, null);
-      if ((this.emit("request", o), o.intercepted)) return o.returnValue;
+      this.emit("request", o);
+      if (o.intercepted) return o.returnValue;
+      
       const a = await fetch(n.send);
       if (500 === a.status) return Promise.reject("");
-      const c = new ResponseContext(n, a, this),
-        u = new HookEvent(c, null, null);
-      if ((this.emit("beforemod", u), u.intercepted)) return u.returnValue;
-      for (const e of this.headers.csp) c.headers[e] && delete c.headers[e];
-      if (
-        (c.headers.location &&
-          (c.headers.location = t.rewriteUrl(c.headers.location)),
-        c.headers["set-cookie"] &&
-          (Promise.resolve(
-            t.cookie.setCookies(c.headers["set-cookie"], r, t.meta),
-          ).then(() => {
-            self.clients.matchAll().then(function (e) {
-              e.forEach(function (e) {
-                e.postMessage({ msg: "updateCookies", url: t.meta.url.href });
-              });
+      
+      const c = new ResponseContext(n, a, this);
+      const u = new HookEvent(c, null, null);
+      this.emit("beforemod", u);
+      if (u.intercepted) return u.returnValue;
+      
+      for (const e of this.headers.csp) {
+        if (c.headers[e]) delete c.headers[e];
+      }
+      
+      if (c.headers.location) {
+        c.headers.location = t.rewriteUrl(c.headers.location);
+      }
+      
+      if (c.headers["set-cookie"]) {
+        Promise.resolve(
+          t.cookie.setCookies(c.headers["set-cookie"], r, t.meta),
+        ).then(() => {
+          self.clients.matchAll().then(function (e) {
+            e.forEach(function (e) {
+              e.postMessage({ msg: "updateCookies", url: t.meta.url.href });
             });
-          }),
-          delete c.headers["set-cookie"]),
-        c.body)
-      )
+          });
+        });
+        delete c.headers["set-cookie"];
+      }
+      
+      if (c.body) {
         switch (e.destination) {
           case "script":
           case "worker":
-            (c.body = `if (!self.__uv && self.importScripts) importScripts('${__uv$config.bundle}', '${__uv$config.config}', '${__uv$config.handler}');\n`),
-              (c.body += t.js.rewrite(await a.text()));
+            c.body = `if (!self.__uv && self.importScripts) importScripts('${__uv$config.bundle}', '${__uv$config.config}', '${__uv$config.handler}');\n`;
+            c.body += t.js.rewrite(await a.text());
             break;
           case "style":
             c.body = t.rewriteCSS(await a.text());
             break;
           case "iframe":
           case "document":
-            isHtml(t.meta.url, c.headers["content-type"] || "") &&
-              (c.body = t.rewriteHtml(await a.text(), {
+            if (isHtml(t.meta.url, c.headers["content-type"] || "")) {
+              c.body = t.rewriteHtml(await a.text(), {
                 document: !0,
                 injectHead: t.createHtmlInject(
                   this.config.handler,
@@ -119,28 +137,34 @@ class UVServiceWorker extends EventEmitter {
                   t.cookie.serialize(s, t.meta, !0),
                   e.referrer,
                 ),
-              }));
+              });
+            }
+            break;
         }
-      return (
-        "text/event-stream" === n.headers.accept &&
-          (c.headers["content-type"] = "text/event-stream"),
-        this.emit("response", u),
-        u.intercepted
-          ? u.returnValue
-          : new Response(c.body, {
-              headers: c.headers,
-              status: c.status,
-              statusText: c.statusText,
-            })
-      );
+      }
+      
+      if ("text/event-stream" === n.headers.accept) {
+        c.headers["content-type"] = "text/event-stream";
+      }
+      
+      this.emit("response", u);
+      if (u.intercepted) return u.returnValue;
+      
+      return new Response(c.body, {
+        headers: c.headers,
+        status: c.status,
+        statusText: c.statusText,
+      });
     } catch (e) {
       return new Response(e.toString(), { status: 500 });
     }
   }
   getBarerResponse(e) {
-    const t = {},
-      r = JSON.parse(e.headers.get("x-bare-headers"));
-    for (const e in r) t[e.toLowerCase()] = r[e];
+    const t = {};
+    const r = JSON.parse(e.headers.get("x-bare-headers") || "{}");
+    for (const key in r) {
+      t[key.toLowerCase()] = r[key];
+    }
     return {
       headers: t,
       status: (+e.headers.get("x-bare-status") || 200),
@@ -171,13 +195,13 @@ class ResponseContext {
           body: t.body,
         }
       : r.getBarerResponse(t);
-    (this.request = e),
-      (this.raw = t),
-      (this.ultraviolet = e.ultraviolet),
-      (this.headers = n),
-      (this.status = s),
-      (this.statusText = i),
-      (this.body = o);
+    this.request = e;
+    this.raw = t;
+    this.ultraviolet = e.ultraviolet;
+    this.headers = n;
+    this.status = s;
+    this.statusText = i;
+    this.body = o;
   }
   get url() {
     return this.request.url;
@@ -191,17 +215,17 @@ class ResponseContext {
 }
 class RequestContext {
   constructor(e, t, r, n = null) {
-    (this.ultraviolet = r),
-      (this.request = e),
-      (this.headers = Object.fromEntries([...e.headers.entries()])),
-      (this.method = e.method),
-      (this.forward = [...t.headers.forward]),
-      (this.address = t.address),
-      (this.body = n || null),
-      (this.redirect = e.redirect),
-      (this.credentials = "omit"),
-      (this.mode = "cors" === e.mode ? e.mode : "same-origin"),
-      (this.blob = !1);
+    this.ultraviolet = r;
+    this.request = e;
+    this.headers = Object.fromEntries([...e.headers.entries()]);
+    this.method = e.method;
+    this.forward = [...t.headers.forward];
+    this.address = t.address;
+    this.body = n || null;
+    this.redirect = e.redirect;
+    this.credentials = "omit";
+    this.mode = "cors" === e.mode ? e.mode : "same-origin";
+    this.blob = !1;
   }
   get send() {
     return new Request(
@@ -250,11 +274,11 @@ class HookEvent {
   #e;
   #t;
   constructor(e = {}, t = null, r = null) {
-    (this.#e = !1),
-      (this.#t = null),
-      (this.data = e),
-      (this.target = t),
-      (this.that = r);
+    this.#e = !1;
+    this.#t = null;
+    this.data = e;
+    this.target = t;
+    this.that = r;
   }
   get intercepted() {
     return this.#e;
@@ -263,7 +287,8 @@ class HookEvent {
     return this.#t;
   }
   respondWith(e) {
-    (this.#t = e), (this.#e = !0);
+    this.#t = e;
+    this.#e = !0;
   }
 }
 var ReflectOwnKeys,
@@ -275,7 +300,7 @@ var ReflectOwnKeys,
           return Function.prototype.apply.call(e, t, r);
         };
 function ProcessEmitWarning(e) {
-  console && console.warn && console.warn(e);
+  if (console && console.warn) console.warn(e);
 }
 ReflectOwnKeys =
   R && "function" == typeof R.ownKeys
@@ -350,14 +375,13 @@ function _addListener(e, t, r, n) {
   return e;
 }
 function onceWrapper() {
-  if (!this.fired)
-    return (
-      this.target.removeListener(this.type, this.wrapFn),
-      (this.fired = !0),
-      0 === arguments.length
+  if (!this.fired) {
+    this.target.removeListener(this.type, this.wrapFn);
+    this.fired = !0;
+    return 0 === arguments.length
         ? this.listener.call(this.target)
-        : this.listener.apply(this.target, arguments)
-    );
+        : this.listener.apply(this.target, arguments);
+  }
 }
 function _onceWrap(e, t, r) {
   var n = { fired: !1, wrapFn: void 0, target: e, type: t, listener: r },
@@ -406,15 +430,15 @@ function once(e, t) {
       e.removeListener(t, i), n(r);
     }
     function i() {
-      "function" == typeof e.removeListener && e.removeListener("error", s),
-        r([].slice.call(arguments));
+      if ("function" == typeof e.removeListener) e.removeListener("error", s);
+      r([].slice.call(arguments));
     }
     eventTargetAgnosticAddListener(e, t, i, { once: !0 }),
       "error" !== t && addErrorHandlerIfEventEmitter(e, s, { once: !0 });
   });
 }
 function addErrorHandlerIfEventEmitter(e, t, r) {
-  "function" == typeof e.on && eventTargetAgnosticAddListener(e, "error", t, r);
+  if ("function" == typeof e.on) eventTargetAgnosticAddListener(e, "error", t, r);
 }
 function eventTargetAgnosticAddListener(e, t, r, n) {
   if ("function" == typeof e.on) n.once ? e.once(t, r) : e.on(t, r);
@@ -425,7 +449,8 @@ function eventTargetAgnosticAddListener(e, t, r, n) {
           typeof e,
       );
     e.addEventListener(t, function s(i) {
-      n.once && e.removeEventListener(t, s), r(i);
+      if (n.once) e.removeEventListener(t, s);
+      r(i);
     });
   }
 }
@@ -445,10 +470,11 @@ Object.defineProperty(EventEmitter, "defaultMaxListeners", {
   },
 }),
   (EventEmitter.init = function () {
-    (void 0 !== this._events &&
-      this._events !== Object.getPrototypeOf(this)._events) ||
-      ((this._events = Object.create(null)), (this._eventsCount = 0)),
-      (this._maxListeners = this._maxListeners || void 0);
+    if (void 0 === this._events || this._events === Object.getPrototypeOf(this)._events) {
+      this._events = Object.create(null);
+      this._eventsCount = 0;
+    }
+    this._maxListeners = this._maxListeners || void 0;
   }),
   (EventEmitter.prototype.setMaxListeners = function (e) {
     if ("number" != typeof e || e < 0 || NumberIsNaN(e))
@@ -464,15 +490,17 @@ Object.defineProperty(EventEmitter, "defaultMaxListeners", {
   }),
   (EventEmitter.prototype.emit = function (e) {
     for (var t = [], r = 1; r < arguments.length; r++) t.push(arguments[r]);
-    var n = "error" === e,
-      s = this._events;
+    var n = "error" === e;
+    var s = this._events;
     if (void 0 !== s) n = n && void 0 === s.error;
     else if (!n) return !1;
     if (n) {
       var i;
-      if ((t.length > 0 && (i = t[0]), i instanceof Error)) throw i;
+      if (t.length > 0) i = t[0];
+      if (i instanceof Error) throw i;
       var o = new Error("Unhandled error." + (i ? " (" + i.message + ")" : ""));
-      throw ((o.context = i), o);
+      o.context = i;
+      throw o;
     }
     var a = s[e];
     if (void 0 === a) return !1;
@@ -492,30 +520,41 @@ Object.defineProperty(EventEmitter, "defaultMaxListeners", {
     return _addListener(this, e, t, !0);
   }),
   (EventEmitter.prototype.once = function (e, t) {
-    return checkListener(t), this.on(e, _onceWrap(this, e, t)), this;
+    checkListener(t);
+    this.on(e, _onceWrap(this, e, t));
+    return this;
   }),
   (EventEmitter.prototype.prependOnceListener = function (e, t) {
-    return checkListener(t), this.prependListener(e, _onceWrap(this, e, t)), this;
+    checkListener(t);
+    this.prependListener(e, _onceWrap(this, e, t));
+    return this;
   }),
   (EventEmitter.prototype.removeListener = function (e, t) {
     var r, n, s, i, o;
-    if ((checkListener(t), void 0 === (n = this._events))) return this;
+    checkListener(t);
+    if (void 0 === (n = this._events)) return this;
     if (void 0 === (r = n[e])) return this;
-    if (r === t || r.listener === t)
-      0 == --this._eventsCount
-        ? (this._events = Object.create(null))
-        : (delete n[e],
-          n.removeListener && this.emit("removeListener", e, r.listener || t));
-    else if ("function" != typeof r) {
-      for (s = -1, i = r.length - 1; i >= 0; i--)
+    if (r === t || r.listener === t) {
+      if (--this._eventsCount == 0) {
+        this._events = Object.create(null);
+      } else {
+        delete n[e];
+        if (n.removeListener) this.emit("removeListener", e, r.listener || t);
+      }
+    } else if ("function" != typeof r) {
+      s = -1;
+      for (i = r.length - 1; i >= 0; i--) {
         if (r[i] === t || r[i].listener === t) {
-          (o = r[i].listener), (s = i);
+          o = r[i].listener;
+          s = i;
           break;
         }
+      }
       if (s < 0) return this;
-      0 === s ? r.shift() : spliceOne(r, s),
-        1 === r.length && (n[e] = r[0]),
-        void 0 !== n.removeListener && this.emit("removeListener", e, o || t);
+      if (0 === s) r.shift();
+      else spliceOne(r, s);
+      if (1 === r.length) n[e] = r[0];
+      if (void 0 !== n.removeListener) this.emit("removeListener", e, o || t);
     }
     return this;
   }),
@@ -523,31 +562,35 @@ Object.defineProperty(EventEmitter, "defaultMaxListeners", {
   (EventEmitter.prototype.removeAllListeners = function (e) {
     var t, r, n;
     if (void 0 === (r = this._events)) return this;
-    if (void 0 === r.removeListener)
-      return (
-        0 === arguments.length
-          ? ((this._events = Object.create(null)), (this._eventsCount = 0))
-          : void 0 !== r[e] &&
-            (0 == --this._eventsCount
-              ? (this._events = Object.create(null))
-              : delete r[e]),
-        this
-      );
+    if (void 0 === r.removeListener) {
+      if (0 === arguments.length) {
+        this._events = Object.create(null);
+        this._eventsCount = 0;
+      } else if (void 0 !== r[e]) {
+        if (--this._eventsCount == 0) {
+          this._events = Object.create(null);
+        } else {
+          delete r[e];
+        }
+      }
+      return this;
+    }
     if (0 === arguments.length) {
-      var s,
-        i = Object.keys(r);
-      for (n = 0; n < i.length; ++n)
-        "removeListener" !== (s = i[n]) && this.removeAllListeners(s);
-      return (
-        this.removeAllListeners("removeListener"),
-        (this._events = Object.create(null)),
-        (this._eventsCount = 0),
-        this
-      );
+      var s;
+      var i = Object.keys(r);
+      for (n = 0; n < i.length; ++n) {
+        s = i[n];
+        if ("removeListener" !== s) this.removeAllListeners(s);
+      }
+      this.removeAllListeners("removeListener");
+      this._events = Object.create(null);
+      this._eventsCount = 0;
+      return this;
     }
     if ("function" == typeof (t = r[e])) this.removeListener(e, t);
-    else if (void 0 !== t)
+    else if (void 0 !== t) {
       for (n = t.length - 1; n >= 0; n--) this.removeListener(e, t[n]);
+    }
     return this;
   }),
   (EventEmitter.prototype.listeners = function (e) {
