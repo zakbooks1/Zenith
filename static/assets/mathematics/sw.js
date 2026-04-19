@@ -285,5 +285,5 @@ EventEmitter.prototype.on = function(type, listener) {
 
 EventEmitter.prototype.emit = function(type, ...args) {
   if (!this._events[type]) return;
-  this._events[type].forEach(listener => listener.apply(this, args));
+  this._events[type].forEach(listener => { listener.apply(this, args); });
 };

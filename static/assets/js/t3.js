@@ -34,7 +34,7 @@ window.addEventListener("load", () => {
     return url;
   }
 });
-document.addEventListener("DOMContentLoaded", event => {
+document.addEventListener("DOMContentLoaded", _event => {
   const addTabButton = document.getElementById("add-tab");
   const tabList = document.getElementById("tab-list");
   const iframeContainer = document.getElementById("frame-container");
@@ -197,6 +197,7 @@ document.addEventListener("DOMContentLoaded", event => {
   createNewTab();
 });
 // Reload
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function reload() {
   const activeIframe = document.querySelector("#frame-container iframe.active");
   if (activeIframe) {
@@ -209,6 +210,7 @@ function reload() {
 }
 
 // Popout
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function popout() {
   const activeIframe = document.querySelector("#frame-container iframe.active");
   if (activeIframe) {
@@ -238,6 +240,7 @@ function popout() {
   }
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function eToggle() {
   const activeIframe = document.querySelector("#frame-container iframe.active");
   if (!activeIframe) {
@@ -296,6 +299,7 @@ function Home() {
 const homeButton = document.getElementById("home-page");
 homeButton.addEventListener("click", Home);
 // Back
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function goBack() {
   const activeIframe = document.querySelector("#frame-container iframe.active");
   if (activeIframe) {
@@ -307,6 +311,7 @@ function goBack() {
   }
 }
 // Forward
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function goForward() {
   const activeIframe = document.querySelector("#frame-container iframe.active");
   if (activeIframe) {

@@ -54,14 +54,17 @@ function processUrl(value, path) {
   }
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function go(value) {
   processUrl(value, "/d");
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function blank(value) {
   processUrl(value);
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function dy(value) {
   processUrl(value, `/a/q/${__uv$config.encodeUrl(value)}`);
 }

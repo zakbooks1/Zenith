@@ -99,6 +99,7 @@ linkInput.addEventListener("input", () => {
   pLink = linkInput.value;
 });
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function saveEventKey() {
   eventKey = eventKeyInput.value.split(",");
   eventKeyRaw = eventKeyInput.value;
@@ -121,6 +122,7 @@ for (const option of sortedOptions) {
   dropdown.appendChild(option);
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function saveIcon() {
   const iconElement = document.getElementById("icon");
   const iconValue = iconElement.value;
@@ -128,6 +130,7 @@ function saveIcon() {
   localStorage.setItem("icon", iconValue);
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function saveName() {
   const nameElement = document.getElementById("name");
   const nameValue = nameElement.value;
@@ -135,6 +138,7 @@ function saveName() {
   localStorage.setItem("name", nameValue);
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function CustomIcon() {
   const iconElement = document.getElementById("icon");
   const iconValue = iconElement.value;
@@ -142,12 +146,14 @@ function CustomIcon() {
   localStorage.setItem("CustomIcon", iconValue);
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function CustomName() {
   const nameElement = document.getElementById("name");
   const nameValue = nameElement.value;
   console.log("saveName function called with name value:", nameValue);
   localStorage.setItem("CustomName", nameValue);
 }
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function ResetCustomCloak() {
   localStorage.removeItem("CustomName");
   localStorage.removeItem("CustomIcon");
@@ -172,14 +178,15 @@ function redirectToMainDomain() {
   } else window.location.href = mainDomainUrl + window.location.pathname;
 }
 
-document.addEventListener("DOMContentLoaded", event => {
-  const icon = document.getElementById("tab-favicon");
-  const name = document.getElementById("t");
+document.addEventListener("DOMContentLoaded", _event => {
+  const _icon = document.getElementById("tab-favicon");
+  const _name = document.getElementById("t");
   const selectedValue = localStorage.getItem("selectedOption") || "Default";
   document.getElementById("dropdown").value = selectedValue;
   updateHeadSection(selectedValue);
 });
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function handleDropdownChange(selectElement) {
   const selectedValue = selectElement.value;
   localStorage.removeItem("CustomName");
@@ -189,7 +196,7 @@ function handleDropdownChange(selectElement) {
   redirectToMainDomain(selectedValue);
 }
 
-function updateHeadSection(selectedValue) {
+function updateHeadSection(_selectedValue) {
   const icon = document.getElementById("tab-favicon");
   const name = document.getElementById("t");
   const customName = localStorage.getItem("CustomName");
@@ -245,12 +252,13 @@ switches.addEventListener("change", event => {
   }
 });
 // AB Cloak
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function AB() {
   let inFrame;
 
   try {
     inFrame = window !== top;
-  } catch (e) {
+  } catch (_e) {
     inFrame = true;
   }
 
@@ -295,6 +303,7 @@ function AB() {
   }
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function toggleAB() {
   ab = localStorage.getItem("ab");
   if (!ab) {
@@ -306,6 +315,7 @@ function toggleAB() {
   }
 }
 // Search Engine
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function EngineChange(dropdown) {
   const selectedEngine = dropdown.value;
 
@@ -326,6 +336,7 @@ function EngineChange(dropdown) {
   dropdown.value = selectedEngine;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function SaveEngine() {
   const customEngine = document.getElementById("engine-form").value;
   if (customEngine.trim() !== "") {
@@ -367,6 +378,7 @@ function randRange(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function exportSaveData() {
   function getCookies() {
     const cookies = document.cookie.split("; ");
@@ -402,6 +414,7 @@ function exportSaveData() {
   URL.revokeObjectURL(url);
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: called from HTML
 function importSaveData() {
   const input = document.createElement("input");
   input.type = "file";
@@ -415,6 +428,7 @@ function importSaveData() {
         const data = JSON.parse(e.target.result);
         if (data.cookies) {
           Object.entries(data.cookies).forEach(([key, value]) => {
+            // biome-ignore lint/security/noDangerouslySetInnerHtmlWithChildren: intentional cookie restore from user's own save file
             document.cookie = `${key}=${value}; path=/`;
           });
         }
