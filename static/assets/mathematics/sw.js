@@ -140,6 +140,36 @@ class UVServiceWorker extends EventEmitter {
           } else {
             finalBody = text;
           }
+
+          // DDG Lite CSS Injector: inject styling since external CSS may not load through proxy
+          if (isHtmlContent && t.meta.url.hostname === "lite.duckduckgo.com") {
+            const ddgLiteStyle = `<style>
+              *{box-sizing:border-box}
+              body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#1a1a2e;color:#e0e0e0;margin:0;padding:16px;font-size:15px}
+              .header{font-size:24px;font-weight:700;color:#de5833;padding:12px 0;letter-spacing:-0.5px}
+              form{margin:12px 0}
+              input.query{background:#2a2a3e;color:#fff;border:1px solid #444;border-radius:6px;padding:8px 12px;font-size:15px;width:280px;outline:none}
+              input.query:focus{border-color:#de5833}
+              input.submit,input.navbutton{background:#de5833;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:14px;cursor:pointer;margin-left:6px}
+              input.submit:hover,input.navbutton:hover{background:#c44a25}
+              select.submit{background:#2a2a3e;color:#e0e0e0;border:1px solid #444;border-radius:6px;padding:6px;margin:4px 4px 4px 0;font-size:13px}
+              table{width:100%;max-width:680px;border-collapse:collapse}
+              a.result-link{color:#7eb8f7;text-decoration:none;font-size:16px;font-weight:500}
+              a.result-link:hover{text-decoration:underline;color:#a8cfff}
+              a{color:#7eb8f7;text-decoration:none}
+              a:hover{text-decoration:underline}
+              .result-snippet{color:#b0b0b0;font-size:14px;line-height:1.5;padding:2px 0}
+              .link-text{color:#4caf7d;font-size:13px}
+              td[valign="top"]{color:#888;padding-top:2px;min-width:28px}
+              tr td{padding:2px 4px}
+              .filters{margin-top:6px}
+              .extra{margin:6px 0}
+              .next_form{display:inline}
+              #end-spacer{height:40px}
+              p.extra{margin:4px 0}
+            </style>`;
+            finalBody = finalBody.replace("</head>", ddgLiteStyle + "</head>");
+          }
         } else {
           finalBody = c.body;
         }
