@@ -1,4 +1,4 @@
-/* Zenith Core Service Worker - Global Safety Edition (ES6+) */
+/* Zenith Core Service Worker - Stream-Safe Edition (ES6+) */
 importScripts("/assets/mathematics/bundle.js?v=9-30-2024");
 importScripts("/assets/mathematics/config.js?v=9-30-2024");
 
@@ -131,32 +131,46 @@ class UVServiceWorker extends EventEmitter {
         delete c.headers["set-cookie"];
       }
       
+      let finalBody = c.body;
+
       if (c.body) {
-        const text = await a.text();
-        switch (e.destination) {
-          case "script":
-          case "worker":
-            c.body = `if (!self.__uv && self.importScripts) importScripts('${__uv$config.bundle}', '${__uv$config.config}', '${__uv$config.handler}');\n`;
-            c.body += t.js.rewrite(text);
-            break;
-          case "style":
-            c.body = t.rewriteCSS(text);
-            break;
-          case "iframe":
-          case "document":
-            if (isHtml(t.meta.url, c.headers["content-type"] || "")) {
-              c.body = t.rewriteHtml(text, {
-                document: true,
-                injectHead: t.createHtmlInject(
-                  this.config.handler,
-                  this.config.bundle,
-                  this.config.config,
-                  t.cookie.serialize(s, t.meta, true),
-                  e.referrer,
-                ),
-              });
-            }
-            break;
+        // Only consume the stream if we are actually going to rewrite it
+        const needsRewrite = ["script", "worker", "style", "iframe", "document"].includes(e.destination) || isHtml(t.meta.url, c.headers["content-type"] || "");
+        
+        if (needsRewrite) {
+          const text = await a.text();
+          switch (e.destination) {
+            case "script":
+            case "worker":
+              finalBody = `if (!self.__uv && self.importScripts) importScripts('${__uv$config.bundle}', '${__uv$config.config}', '${__uv$config.handler}');\n`;
+              finalBody += t.js.rewrite(text);
+              break;
+            case "style":
+              finalBody = t.rewriteCSS(text);
+              break;
+            case "iframe":
+            case "document":
+              if (isHtml(t.meta.url, c.headers["content-type"] || "")) {
+                finalBody = t.rewriteHtml(text, {
+                  document: true,
+                  injectHead: t.createHtmlInject(
+                    this.config.handler,
+                    this.config.bundle,
+                    this.config.config,
+                    t.cookie.serialize(s, t.meta, true),
+                    e.referrer,
+                  ),
+                });
+              }
+              break;
+            default:
+              // Fallback for cases like isHtml but not document/iframe
+              if (isHtml(t.meta.url, c.headers["content-type"] || "")) {
+                 finalBody = t.rewriteHtml(text);
+              } else {
+                 finalBody = text;
+              }
+          }
         }
       }
       
@@ -169,10 +183,9 @@ class UVServiceWorker extends EventEmitter {
         return u.returnValue;
       }
       
-      // CRITICAL SAFETY LOCK: Never allow status 0 to reach the browser
       const finalStatus = (c.status < 200 || c.status > 599) ? 200 : c.status;
       
-      return new Response(c.body, {
+      return new Response(finalBody, {
         headers: c.headers,
         status: finalStatus,
         statusText: c.statusText || "OK",
