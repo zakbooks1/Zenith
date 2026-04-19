@@ -1,8 +1,14 @@
-// index.js
-window.addEventListener("load", () => {
-  navigator.serviceWorker.register("../sw.js?v=2025-04-15", {
-    scope: "/a/",
-  });
+// index.js — register before first /a/ navigation (tabs iframe race)
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+  try {
+    await navigator.serviceWorker.register("/sw.js?v=2025-04-15", { scope: "/a/" });
+    await navigator.serviceWorker.ready;
+  } catch (e) {
+    console.error("Service worker registration failed:", e);
+  }
 });
 
 let xl;

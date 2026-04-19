@@ -1,6 +1,14 @@
 // tabs.js
-window.addEventListener("load", () => {
-  navigator.serviceWorker.register("../sw.js?v=2025-04-15", { scope: "/a/" });
+document.addEventListener("DOMContentLoaded", async _event => {
+  if ("serviceWorker" in navigator) {
+    try {
+      await navigator.serviceWorker.register("/sw.js?v=2025-04-15", { scope: "/a/" });
+      await navigator.serviceWorker.ready;
+    } catch (e) {
+      console.error("Service worker registration failed:", e);
+    }
+  }
+
   const form = document.getElementById("fv");
   const input = document.getElementById("input");
   if (form && input) {
@@ -33,8 +41,6 @@ window.addEventListener("load", () => {
     }
     return url;
   }
-});
-document.addEventListener("DOMContentLoaded", _event => {
   const addTabButton = document.getElementById("add-tab");
   const tabList = document.getElementById("tab-list");
   const iframeContainer = document.getElementById("frame-container");

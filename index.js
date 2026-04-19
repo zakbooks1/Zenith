@@ -106,6 +106,11 @@ routes.forEach(route => {
   });
 });
 
+app.get(/^\/a\/(.+)/, (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.sendFile(path.join(__dirname, "static", "uv-bootstrap.html"));
+});
+
 app.use((_req, res, _next) => {
   res.status(404).sendFile(path.join(__dirname, "static", "404.html"));
 });
