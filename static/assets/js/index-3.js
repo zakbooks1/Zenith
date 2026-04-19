@@ -34,7 +34,7 @@ if (form && input) {
 function processUrl(value, path) {
   let url = value.trim();
   const engine = localStorage.getItem("engine");
-  const searchUrl = engine ? engine : "https://duckduckgo.com/?q=";
+  const searchUrl = engine ? engine : "https://lite.duckduckgo.com/lite/?q=";
 
   if (!isUrl(url)) {
     url = searchUrl + url;

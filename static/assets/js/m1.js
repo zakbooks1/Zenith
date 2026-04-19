@@ -19,10 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (nav) {
     const LogoUrl = "https://cdn.glitch.global/0f91a92e-333e-436b-80a5-f4857b28f321/Zenith%20Logo.png?v=1713045612347";
 
-// Search Engine Migration: Automatically switch from broken Google to stable DuckDuckGo
+// Search Engine Migration: Automatically switch from JS-heavy search engines to DDG Lite (pure HTML)
 const currentEngine = localStorage.getItem("engine");
-if (!currentEngine || currentEngine.includes("google.com/search")) {
-    localStorage.setItem("engine", "https://duckduckgo.com/?q=");
+if (!currentEngine || currentEngine.includes("google.com/search") || currentEngine === "https://duckduckgo.com/?q=") {
+    localStorage.setItem("engine", "https://lite.duckduckgo.com/lite/?q=");
     localStorage.setItem("enginename", "DuckDuckGo");
 }
     const html = `
