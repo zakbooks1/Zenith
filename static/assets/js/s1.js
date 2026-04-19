@@ -428,7 +428,7 @@ function importSaveData() {
         const data = JSON.parse(e.target.result);
         if (data.cookies) {
           Object.entries(data.cookies).forEach(([key, value]) => {
-            // biome-ignore lint/suspicious/noCookieAccess: intentional cookie restore from user's own exported save file
+            // biome-ignore lint: intentional cookie restore from user's own exported save file
             document.cookie = `${key}=${value}; path=/`;
           });
         }
