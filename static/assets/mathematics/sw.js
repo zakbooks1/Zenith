@@ -1,4 +1,4 @@
-/* Zenith Core Service Worker - Super Clean Edition */
+/* Zenith Core Service Worker - Nuclear Clean Edition (ES6+) */
 importScripts("/assets/mathematics/bundle.js?v=9-30-2024");
 importScripts("/assets/mathematics/config.js?v=9-30-2024");
 
@@ -11,7 +11,7 @@ class UVServiceWorker extends EventEmitter {
     this.addresses =
       typeof e.bare === "string"
         ? [new URL(e.bare, location)]
-        : e.bare.map(item => new URL(item, location));
+        : e.bare.map((item) => new URL(item, location));
     this.headers = {
       csp: [
         "cross-origin-embedder-policy",
@@ -46,7 +46,7 @@ class UVServiceWorker extends EventEmitter {
   }
 
   async fetch({ request: e }) {
-    if (!e.url.startsWith(location.origin + (this.config.prefix || "/service/"))) {
+    if (!e.url.startsWith(`${location.origin}${this.config.prefix || "/service/"}`)) {
       return fetch(e);
     }
     try {
@@ -65,8 +65,9 @@ class UVServiceWorker extends EventEmitter {
       
       if (t.meta.url.protocol === "blob:") {
         n.blob = true;
-        n.url = new URL(n.url.pathname);
-        n.base = new URL(n.url.pathname);
+        const blobUrl = new URL(n.url.pathname);
+        n.url = blobUrl;
+        n.base = blobUrl;
       }
       
       if (e.referrer && e.referrer.startsWith(location.origin)) {
@@ -182,15 +183,13 @@ class UVServiceWorker extends EventEmitter {
     const headers = {};
     const bareHeadersRaw = e.headers.get("x-bare-headers");
     const r = JSON.parse(bareHeadersRaw || "{}");
-    for (const key in r) {
-      if (Object.prototype.hasOwnProperty.call(r, key)) {
-        headers[key.toLowerCase()] = r[key];
-      }
+    for (const key of Object.keys(r)) {
+      headers[key.toLowerCase()] = r[key];
     }
     const status = parseInt(e.headers.get("x-bare-status"), 10) || 200;
     return {
-      headers: headers,
-      status: status,
+      headers,
+      status,
       statusText: e.headers.get("x-bare-status-text") || "OK",
       body: this.statusCode.empty.includes(status) ? null : e.body,
     };
@@ -252,13 +251,14 @@ class RequestContext {
   }
   get send() {
     const url = this.blob
-      ? "blob:" + location.origin + this.url.pathname
-      : this.address.href + "v1/";
+      ? `blob:${location.origin}${this.url.pathname}`
+      : `${this.address.href}v1/`;
     const bareHeaders = {
       "x-bare-protocol": this.url.protocol,
       "x-bare-host": this.url.hostname,
-      "x-bare-path": this.url.pathname + this.url.search,
-      "x-bare-port": this.url.port || (this.url.protocol === "https:" ? "443" : "80"),
+      "x-bare-path": `${this.url.pathname}${this.url.search}`,
+      "x-bare-port":
+        this.url.port || (this.url.protocol === "https:" ? "443" : "80"),
       "x-bare-headers": JSON.stringify(this.headers),
       "x-bare-forward-headers": JSON.stringify(this.forward),
     };
@@ -313,14 +313,12 @@ class HookEvent {
   }
 }
 
-var ReflectOwnKeys;
-var R = typeof Reflect === "object" ? Reflect : null;
-var ReflectApply =
+let ReflectOwnKeys;
+const R = typeof Reflect === "object" ? Reflect : null;
+const ReflectApply =
   R && typeof R.apply === "function"
     ? R.apply
-    : function (fn, thisArg, args) {
-        return Function.prototype.apply.call(fn, thisArg, args);
-      };
+    : (fn, thisArg, args) => Function.prototype.apply.call(fn, thisArg, args);
 
 function ProcessEmitWarning(warning) {
   if (console && typeof console.warn === "function") {
@@ -332,20 +330,14 @@ ReflectOwnKeys =
   R && typeof R.ownKeys === "function"
     ? R.ownKeys
     : Object.getOwnPropertySymbols
-      ? function (obj) {
-          return Object.getOwnPropertyNames(obj).concat(
+      ? (obj) => Object.getOwnPropertyNames(obj).concat(
             Object.getOwnPropertySymbols(obj),
-          );
-        }
-      : function (obj) {
-          return Object.getOwnPropertyNames(obj);
-        };
+          )
+      : (obj) => Object.getOwnPropertyNames(obj);
 
-var NumberIsNaN =
+const NumberIsNaN =
   Number.isNaN ||
-  function (val) {
-    return val !== val;
-  };
+  ((val) => val !== val);
 
 function EventEmitter() {
   EventEmitter.init.call(this);
@@ -356,12 +348,12 @@ EventEmitter.prototype._events = undefined;
 EventEmitter.prototype._eventsCount = 0;
 EventEmitter.prototype._maxListeners = undefined;
 
-var defaultMaxListeners = 10;
+let defaultMaxListeners = 10;
 
 function checkListener(listener) {
   if (typeof listener !== "function") {
     throw new TypeError(
-      'The "listener" argument must be of type Function. Received type ' + typeof listener,
+      `The "listener" argument must be of type Function. Received type ${typeof listener}`,
     );
   }
 }
@@ -374,9 +366,9 @@ function _getMaxListeners(emitter) {
 }
 
 function _addListener(emitter, type, listener, prepend) {
-  var m;
-  var events;
-  var existing;
+  let m;
+  let events;
+  let existing;
   checkListener(listener);
   events = emitter._events;
   if (events === undefined) {
@@ -403,12 +395,8 @@ function _addListener(emitter, type, listener, prepend) {
     m = _getMaxListeners(emitter);
     if (m > 0 && existing.length > m && !existing.warned) {
       existing.warned = true;
-      var err = new Error(
-        "Possible EventEmitter memory leak detected. " +
-          existing.length +
-          " " +
-          String(type) +
-          " listeners added. Use emitter.setMaxListeners() to increase limit",
+      const err = new Error(
+        `Possible EventEmitter memory leak detected. ${existing.length} ${String(type)} listeners added. Use emitter.setMaxListeners() to increase limit`,
       );
       err.name = "MaxListenersExceededWarning";
       err.emitter = emitter;
@@ -420,31 +408,31 @@ function _addListener(emitter, type, listener, prepend) {
   return emitter;
 }
 
-function onceWrapper() {
+function onceWrapper(...args) {
   if (!this.fired) {
     this.target.removeListener(this.type, this.wrapFn);
     this.fired = true;
-    if (arguments.length === 0) {
+    if (args.length === 0) {
       return this.listener.call(this.target);
     }
-    return this.listener.apply(this.target, arguments);
+    return this.listener.apply(this.target, args);
   }
 }
 
 function _onceWrap(emitter, type, listener) {
-  var state = { fired: false, wrapFn: undefined, target: emitter, type: type, listener: listener };
-  var wrapped = onceWrapper.bind(state);
+  const state = { fired: false, wrapFn: undefined, target: emitter, type, listener };
+  const wrapped = onceWrapper.bind(state);
   wrapped.listener = listener;
   state.wrapFn = wrapped;
   return wrapped;
 }
 
 function _listeners(emitter, type, unwrap) {
-  var events = emitter._events;
+  const events = emitter._events;
   if (events === undefined) {
     return [];
   }
-  var evlistener = events[type];
+  const evlistener = events[type];
   if (evlistener === undefined) {
     return [];
   }
@@ -455,9 +443,9 @@ function _listeners(emitter, type, unwrap) {
 }
 
 function listenerCount(type) {
-  var events = this._events;
+  const events = this._events;
   if (events !== undefined) {
-    var evlistener = events[type];
+    const evlistener = events[type];
     if (typeof evlistener === "function") {
       return 1;
     }
@@ -469,39 +457,39 @@ function listenerCount(type) {
 }
 
 function arrayClone(arr, n) {
-  var copy = new Array(n);
-  for (var i = 0; i < n; ++i) {
+  const copy = new Array(n);
+  for (let i = 0; i < n; ++i) {
     copy[i] = arr[i];
   }
   return copy;
 }
 
 function spliceOne(list, index) {
-  for (var i = index; i + 1 < list.length; i++) {
+  for (let i = index; i + 1 < list.length; i++) {
     list[i] = list[i + 1];
   }
   list.pop();
 }
 
 function unwrapListeners(arr) {
-  var ret = new Array(arr.length);
-  for (var i = 0; i < ret.length; ++i) {
+  const ret = new Array(arr.length);
+  for (let i = 0; i < ret.length; ++i) {
     ret[i] = arr[i].listener || arr[i];
   }
   return ret;
 }
 
 function once(emitter, type) {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     function errorListener(err) {
       emitter.removeListener(type, resolver);
       reject(err);
     }
-    function resolver() {
+    function resolver(...args) {
       if (typeof emitter.removeListener === "function") {
         emitter.removeListener("error", errorListener);
       }
-      resolve([].slice.call(arguments));
+      resolve(args);
     }
     eventTargetAgnosticAddListener(emitter, type, resolver, { once: true });
     if (type !== "error") {
@@ -526,8 +514,7 @@ function eventTargetAgnosticAddListener(emitter, type, listener, flags) {
   } else {
     if (typeof emitter.addEventListener !== "function") {
       throw new TypeError(
-        'The "emitter" argument must be of type EventEmitter. Received type ' +
-          typeof emitter,
+        `The "emitter" argument must be of type EventEmitter. Received type ${typeof emitter}`,
       );
     }
     emitter.addEventListener(type, function handler(ev) {
@@ -541,15 +528,11 @@ function eventTargetAgnosticAddListener(emitter, type, listener, flags) {
 
 Object.defineProperty(EventEmitter, "defaultMaxListeners", {
   enumerable: true,
-  get: function () {
-    return defaultMaxListeners;
-  },
-  set: function (arg) {
+  get: () => defaultMaxListeners,
+  set: (arg) => {
     if (typeof arg !== "number" || arg < 0 || NumberIsNaN(arg)) {
       throw new RangeError(
-        'The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ' +
-          arg +
-          ".",
+        `The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ${arg}.`,
       );
     }
     defaultMaxListeners = arg;
@@ -567,9 +550,7 @@ EventEmitter.init = function () {
 EventEmitter.prototype.setMaxListeners = function (n) {
   if (typeof n !== "number" || n < 0 || NumberIsNaN(n)) {
     throw new RangeError(
-      'The value of "n" is out of range. It must be a non-negative number. Received ' +
-        n +
-        ".",
+      `The value of "n" is out of range. It must be a non-negative number. Received ${n}.`,
     );
   }
   this._maxListeners = n;
@@ -580,40 +561,36 @@ EventEmitter.prototype.getMaxListeners = function () {
   return _getMaxListeners(this);
 };
 
-EventEmitter.prototype.emit = function (type) {
-  var args = [];
-  for (var i = 1; i < arguments.length; i++) {
-    args.push(arguments[i]);
-  }
-  var doError = type === "error";
-  var events = this._events;
+EventEmitter.prototype.emit = function (type, ...args) {
+  let doError = type === "error";
+  const events = this._events;
   if (events !== undefined) {
     doError = doError && events.error === undefined;
   } else if (!doError) {
     return false;
   }
   if (doError) {
-    var er;
+    let er;
     if (args.length > 0) {
       er = args[0];
     }
     if (er instanceof Error) {
       throw er;
     }
-    var err = new Error("Unhandled error." + (er ? " (" + er.message + ")" : ""));
+    const err = new Error(`Unhandled error.${er ? ` (${er.message})` : ""}`);
     err.context = er;
     throw err;
   }
-  var handler = events[type];
+  const handler = events[type];
   if (handler === undefined) {
     return false;
   }
   if (typeof handler === "function") {
     ReflectApply(handler, this, args);
   } else {
-    var len = handler.length;
-    var listeners = arrayClone(handler, len);
-    for (var j = 0; j < len; ++j) {
+    const len = handler.length;
+    const listeners = arrayClone(handler, len);
+    for (let j = 0; j < len; ++j) {
       ReflectApply(listeners[j], this, args);
     }
   }
@@ -643,7 +620,10 @@ EventEmitter.prototype.prependOnceListener = function (type, listener) {
 };
 
 EventEmitter.prototype.removeListener = function (type, listener) {
-  var list, events, position, i, relistener;
+  let list;
+  let events;
+  let position;
+  let relistener;
   checkListener(listener);
   events = this._events;
   if (events === undefined) {
@@ -664,7 +644,7 @@ EventEmitter.prototype.removeListener = function (type, listener) {
     }
   } else if (typeof list !== "function") {
     position = -1;
-    for (i = list.length - 1; i >= 0; i--) {
+    for (let i = list.length - 1; i >= 0; i--) {
       if (list[i] === listener || list[i].listener === listener) {
         relistener = list[i].listener;
         position = i;
@@ -692,7 +672,8 @@ EventEmitter.prototype.removeListener = function (type, listener) {
 EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
 
 EventEmitter.prototype.removeAllListeners = function (type) {
-  var events, i, keys;
+  let events;
+  let keys;
   events = this._events;
   if (events === undefined) {
     return this;
@@ -712,8 +693,8 @@ EventEmitter.prototype.removeAllListeners = function (type) {
   }
   if (arguments.length === 0) {
     keys = Object.keys(events);
-    for (i = 0; i < keys.length; ++i) {
-      var key = keys[i];
+    for (let i = 0; i < keys.length; ++i) {
+      const key = keys[i];
       if (key === "removeListener") {
         continue;
       }
@@ -724,11 +705,11 @@ EventEmitter.prototype.removeAllListeners = function (type) {
     this._eventsCount = 0;
     return this;
   }
-  var handler = events[type];
+  const handler = events[type];
   if (typeof handler === "function") {
     this.removeListener(type, handler);
   } else if (handler !== undefined) {
-    for (i = handler.length - 1; i >= 0; i--) {
+    for (let i = handler.length - 1; i >= 0; i--) {
       this.removeListener(type, handler[i]);
     }
   }
@@ -743,7 +724,7 @@ EventEmitter.prototype.rawListeners = function (type) {
   return _listeners(this, type, false);
 };
 
-EventEmitter.listenerCount = function (emitter, type) {
+EventEmitter.listenerCount = (emitter, type) => {
   if (typeof emitter.listenerCount === "function") {
     return emitter.listenerCount(type);
   }
