@@ -1,7 +1,7 @@
 {
   "name": "Zenith Unblocker",
   "description": "The peak of web unblocking.",
-  "repository": "https://github.com/ZenithUnblocker/Zenith",
+  "repository": "https://github.com/zakbooks1/Zenith",
   "logo": "/assets/media/favicon/zenith.png",
   "keywords": ["school", "math"],
   "image": "heroku/nodejs"
