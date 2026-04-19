@@ -1,4 +1,4 @@
-/* Zenith Core Service Worker - Stream-Safe Edition (ES6+) */
+/* Zenith Core Service Worker - Body-Lock Shield Edition (ES6+) */
 importScripts("/assets/mathematics/bundle.js?v=9-30-2024");
 importScripts("/assets/mathematics/config.js?v=9-30-2024");
 
@@ -134,23 +134,24 @@ class UVServiceWorker extends EventEmitter {
       let finalBody = c.body;
 
       if (c.body) {
-        // Only consume the stream if we are actually going to rewrite it
-        const needsRewrite = ["script", "worker", "style", "iframe", "document"].includes(e.destination) || isHtml(t.meta.url, c.headers["content-type"] || "");
+        const contentType = c.headers["content-type"] || "";
+        const isHtmlContent = isHtml(t.meta.url, contentType);
+        const needsRewrite = ["script", "worker", "style", "iframe", "document"].includes(e.destination) || isHtmlContent;
         
         if (needsRewrite) {
+          // If we need to rewrite, we consume the original body and replace finalBody with a string
           const text = await a.text();
           switch (e.destination) {
             case "script":
             case "worker":
-              finalBody = `if (!self.__uv && self.importScripts) importScripts('${__uv$config.bundle}', '${__uv$config.config}', '${__uv$config.handler}');\n`;
-              finalBody += t.js.rewrite(text);
+              finalBody = `if (!self.__uv && self.importScripts) importScripts('${__uv$config.bundle}', '${__uv$config.config}', '${__uv$config.handler}');\n${t.js.rewrite(text)}`;
               break;
             case "style":
               finalBody = t.rewriteCSS(text);
               break;
             case "iframe":
             case "document":
-              if (isHtml(t.meta.url, c.headers["content-type"] || "")) {
+              if (isHtmlContent) {
                 finalBody = t.rewriteHtml(text, {
                   document: true,
                   injectHead: t.createHtmlInject(
@@ -161,11 +162,12 @@ class UVServiceWorker extends EventEmitter {
                     e.referrer,
                   ),
                 });
+              } else {
+                finalBody = text;
               }
               break;
             default:
-              // Fallback for cases like isHtml but not document/iframe
-              if (isHtml(t.meta.url, c.headers["content-type"] || "")) {
+              if (isHtmlContent) {
                  finalBody = t.rewriteHtml(text);
               } else {
                  finalBody = text;
