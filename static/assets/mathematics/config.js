@@ -1,6 +1,7 @@
 self.__uv$config = {
   prefix: "/a/",
-  bare: "https://focus-bare-xi.vercel.app",
+  // Adding /bare/ ensures Ultraviolet talks to the correct API endpoint
+  bare: "https://focus-bare-xi.vercel.app/bare/", 
   encodeUrl: Ultraviolet.codec.xor.encode,
   decodeUrl: Ultraviolet.codec.xor.decode,
 
